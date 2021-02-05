@@ -1,18 +1,131 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+    <canvas id="canvas"></canvas>
+    <a-button type="primary" @click="addRect">添加一个矩形</a-button>
+    <a-input-group compact>
+      <a-row :gutter="8">
+        <a-input type="text" placeholder="背景色" v-model="backgroundColor" />
+        <a-button type="primary" @click="setBackgroundColor"
+          >设置背景色</a-button
+        >
+      </a-row>
+    </a-input-group>
+    <a-input-group compact>
+      <a-row :gutter="8">
+        <a-input
+          type="text"
+          placeholder="背景图片地址"
+          v-model="backgroundSrc"
+        />
+        <a-button type="primary" @click="setBackgroundImage"
+          >设置背景图</a-button
+        >
+      </a-row>
+    </a-input-group>
+    <a-input-group compact>
+      <a-row :gutter="8">
+        <a-input type="text" placeholder="插入图片地址" v-model="imgSrc" />
+        <a-button type="primary" @click="setImg">插入图片</a-button>
+      </a-row>
+    </a-input-group>
+    <a-input-group compact>
+      <a-row :gutter="8">
+        <a-input type="text" placeholder="插入文字" v-model="text" />
+        <a-button type="primary" @click="setText">插入文字</a-button>
+      </a-row>
+    </a-input-group>
+    <a-button @click="getActiveObject">getActiveObject</a-button>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
+import { Component, Vue } from 'vue-property-decorator'
+import 'fabric'
+@Component
+export default class Home extends Vue {
+  private canvas: any
+  private backgroundSrc: string = ''
+  private backgroundColor: string = ''
+  private imgSrc: string = ''
+  private text: string = ''
+  private selectedObj: any
 
-@Component({
-  components: {
-    HelloWorld,
-  },
-})
-export default class Home extends Vue {}
+  mounted(): void {
+    console.log(fabric)
+    this.canvas = new fabric.Canvas('canvas', {
+      backgroundColor: 'rgba(134, 131, 120, 0.3)',
+    })
+    this.canvas.setWidth(500)
+    this.canvas.setHeight(500)
+    this.canvas.on('object:modified', (e: any) => {
+      console.log('modified:', e)
+    })
+    this.canvas.on('object: added', (e: any) => {
+      console.log('added:', e)
+    })
+    this.canvas.on('object: created', (e: any) => {
+      console.log('created:', e)
+    })
+    this.canvas.on('object: updated', (e: any) => {
+      console.log('updated:', e)
+    })
+  }
+  // 添加矩形
+  addRect(): void {
+    var rect = new fabric.Rect({
+      top: 100,
+      left: 100,
+      width: 60,
+      height: 70,
+      fill: 'red',
+    })
+    this.canvas.add(rect)
+  }
+  // 设置背景图
+  setBackgroundImage(): void {
+    fabric.Image.fromURL(this.backgroundSrc, (img: any) => {
+      img.set({
+        scaleX: this.canvas.width / img.width,
+        scaleY: this.canvas.height / img.height,
+      })
+      this.canvas.setBackgroundImage(
+        img,
+        this.canvas.renderAll.bind(this.canvas)
+      )
+      this.canvas.renderAll()
+    })
+  }
+  // 设置背景色
+  setBackgroundColor(): void {
+    this.canvas.setBackgroundColor(
+      this.backgroundColor,
+      this.canvas.renderAll.bind(this.canvas)
+    )
+  }
+  // 设置图片
+  setImg(): void {
+    fabric.Image.fromURL(this.imgSrc, (img: any) => {
+      img.set({
+        borderColor: 'red',
+      })
+      this.canvas.add(img)
+    })
+  }
+  // 设置文字
+  setText(): void {
+    const textInstance = new fabric.Textbox(this.text, {
+      left: 50,
+      top: 50,
+      fontSize: 20,
+      fontWeight: 500,
+      borderColor: 'red',
+      editingBorderColor: 'blue',
+    })
+    this.canvas.add(textInstance)
+  }
+  // 获取选中图层
+  getActiveObject(): void {
+    this.selectedObj = this.canvas.getActiveObject()
+  }
+}
 </script>
