@@ -4,3 +4,6 @@ declare module "*.vue" {
 }
 
 declare let fabric: any;
+declare let createjs: any;
+declare let Konva: any;
+
